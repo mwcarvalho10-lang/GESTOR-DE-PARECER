@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Home, Download, Edit3, Trash2, CheckCircle2, Menu, Clock, HelpCircle } from 'lucide-react';
+import { Home, Download, Edit3, Trash2, CheckCircle2, Menu, Clock, HelpCircle, Bell } from 'lucide-react';
 import { AppData, Skill, ClassData } from '@/lib/types';
 import { units, subjects } from '@/lib/constants';
 import { StudentModal } from './StudentModal';
 import { SkillsModal } from './SkillsModal';
 import { HelpModal } from './HelpModal';
-import { Document, Packer, Paragraph, HeadingLevel, AlignmentType } from 'docx';
+import { Document, Packer, Paragraph, HeadingLevel, AlignmentType, TextRun } from 'docx';
 import { saveAs } from 'file-saver';
 
 interface MainAppProps {
@@ -34,12 +34,18 @@ export function MainApp({ currentGrade, currentLetter, appData, globalSkills, on
   const [skillsModalOpen, setSkillsModalOpen] = useState(false);
   const [helpModalOpen, setHelpModalOpen] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isNotificationCleared, setIsNotificationCleared] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(false);
 
   const reportRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setActiveSubFilter("all");
   }, [activeTab, currentGrade]);
+
+  useEffect(() => {
+    setIsNotificationCleared(false);
+  }, [selectedUnit]);
 
   useEffect(() => {
     if (!classData.students.includes(selectedStudent)) {
@@ -183,6 +189,14 @@ export function MainApp({ currentGrade, currentLetter, appData, globalSkills, on
     return Math.round((done / total) * 100) + "%";
   };
 
+  const pendingStudents = classData.students.filter(s => {
+    const isActive = classData[s]?.active !== false;
+    if (!isActive) return false;
+    const data = classData[s]?.[selectedUnit];
+    const isDone = data?.skills?.length > 0 || data?.observation?.trim()?.length > 0;
+    return !isDone;
+  });
+
   const currentStudentData = selectedStudent ? classData[selectedStudent][selectedUnit] : null;
   
   const subjectSubFilters: Record<string, { id: string, label: string, match: (id: string) => boolean }[]> = {
@@ -281,7 +295,11 @@ export function MainApp({ currentGrade, currentLetter, appData, globalSkills, on
         });
       const text = selected.length > 0 ? formatReportText(selectedStudent, u, selected) : (data.observation || "NÃO PREENCHIDO");
       children.push(new Paragraph({ text: u.toUpperCase(), heading: HeadingLevel.HEADING_3, spacing: { before: 200 } }));
-      children.push(new Paragraph({ text: text.toUpperCase(), alignment: AlignmentType.JUSTIFIED, spacing: { after: 200 } }));
+      children.push(new Paragraph({ 
+        children: [new TextRun({ text: text.toUpperCase(), font: "Arial", size: 20 })], 
+        alignment: AlignmentType.JUSTIFIED, 
+        spacing: { after: 200 } 
+      }));
     });
     
     const doc = new Document({ sections: [{ children }] });
@@ -308,7 +326,11 @@ export function MainApp({ currentGrade, currentLetter, appData, globalSkills, on
         });
       const text = selected.length > 0 ? formatReportText(s, selectedUnit, selected) : (data.observation || "NÃO PREENCHIDO");
       children.push(new Paragraph({ text: `ESTUDANTE: ${s}`, heading: HeadingLevel.HEADING_2 }));
-      children.push(new Paragraph({ text: text.toUpperCase(), alignment: AlignmentType.JUSTIFIED, spacing: { after: 300 } }));
+      children.push(new Paragraph({ 
+        children: [new TextRun({ text: text.toUpperCase(), font: "Arial", size: 20 })], 
+        alignment: AlignmentType.JUSTIFIED, 
+        spacing: { after: 300 } 
+      }));
     });
     
     const doc = new Document({ sections: [{ children }] });
@@ -343,6 +365,36 @@ export function MainApp({ currentGrade, currentLetter, appData, globalSkills, on
           ))}
         </div>
         <div className="flex items-center gap-4">
+          <div className="relative">
+            <button onClick={() => setShowNotifications(!showNotifications)} className="w-10 h-10 hover:bg-slate-100 rounded-full flex items-center justify-center text-slate-400 transition-colors relative" title="Notificações">
+              <Bell className="w-5 h-5" />
+              {!isNotificationCleared && pendingStudents.length > 0 && (
+                <span className="absolute top-2 right-2 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white"></span>
+              )}
+            </button>
+
+            {showNotifications && (
+              <div className="absolute top-full right-0 mt-2 w-72 bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden z-[100]">
+                <div className="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50">
+                  <h3 className="text-xs font-black uppercase text-slate-800">Pendências - {selectedUnit}</h3>
+                  <button onClick={() => { setIsNotificationCleared(true); setShowNotifications(false); }} className="text-[9px] font-bold text-slate-500 hover:text-escola-azul uppercase">Limpar</button>
+                </div>
+                <div className="max-h-64 overflow-y-auto p-2">
+                  {pendingStudents.length === 0 ? (
+                    <div className="p-4 text-center text-xs text-slate-500 font-medium">Nenhuma pendência nesta unidade! 🎉</div>
+                  ) : (
+                    <div className="space-y-1">
+                      {pendingStudents.map(s => (
+                        <button key={s} onClick={() => { setSelectedStudent(s); setShowNotifications(false); }} className="w-full text-left px-3 py-2 hover:bg-slate-50 rounded-xl text-[11px] font-bold text-slate-600 transition-colors truncate">
+                          {s}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
           <button onClick={() => setHelpModalOpen(true)} className="w-10 h-10 hover:bg-slate-100 rounded-full flex items-center justify-center text-slate-400 transition-colors" title="Guia de Uso">
             <HelpCircle className="w-5 h-5" />
           </button>

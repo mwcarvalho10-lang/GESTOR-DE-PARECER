@@ -5,10 +5,12 @@ import { Dashboard } from '@/components/Dashboard';
 import { MainApp } from '@/components/MainApp';
 import { AppData, Skill } from '@/lib/types';
 import { defaultSkills } from '@/lib/defaultSkills';
+import { PIN_CONFIG } from '@/lib/constants';
 
 export default function Page() {
   const [globalSkills, setGlobalSkills] = useState<Skill[]>([]);
   const [appData, setAppData] = useState<AppData>({});
+  const [pinConfig, setPinConfig] = useState<Record<string, string>>(PIN_CONFIG);
   const [isLoaded, setIsLoaded] = useState(false);
   
   const [currentScreen, setCurrentScreen] = useState<'dashboard' | 'app'>('dashboard');
@@ -28,10 +30,16 @@ export default function Page() {
     }
     localStorage.setItem('edu_skills_v13', JSON.stringify(skills));
     const data = JSON.parse(localStorage.getItem('edu_data_v13') || '{}');
+    const savedPinConfig = JSON.parse(localStorage.getItem('edu_pin_config_v13') || 'null');
+    
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setGlobalSkills(skills);
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setAppData(data);
+    if (savedPinConfig) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setPinConfig(savedPinConfig);
+    }
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsLoaded(true);
   }, []);
@@ -44,6 +52,11 @@ export default function Page() {
   const handleUpdateGlobalSkills = (newSkills: Skill[]) => {
     setGlobalSkills(newSkills);
     localStorage.setItem('edu_skills_v13', JSON.stringify(newSkills));
+  };
+
+  const handleUpdatePinConfig = (newConfig: Record<string, string>) => {
+    setPinConfig(newConfig);
+    localStorage.setItem('edu_pin_config_v13', JSON.stringify(newConfig));
   };
 
   const handleSelectClass = (grade: string, letter: string) => {
@@ -70,6 +83,8 @@ export default function Page() {
         <Dashboard 
           appData={appData} 
           onSelectClass={handleSelectClass} 
+          pinConfig={pinConfig}
+          onUpdatePinConfig={handleUpdatePinConfig}
         />
       ) : (
         <MainApp 

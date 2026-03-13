@@ -1,19 +1,23 @@
 import React, { useState } from 'react';
-import { GraduationCap, BookOpen, ChevronDown, ChevronUp, HelpCircle } from 'lucide-react';
-import { gradesArr, lettersArr, PIN_CONFIG } from '@/lib/constants';
+import { GraduationCap, BookOpen, ChevronDown, ChevronUp, HelpCircle, Lock } from 'lucide-react';
+import { gradesArr, lettersArr } from '@/lib/constants';
 import { PinModal } from './PinModal';
 import { HelpModal } from './HelpModal';
+import { AdminSettingsModal } from './AdminSettingsModal';
 import { AppData } from '@/lib/types';
 
 interface DashboardProps {
   appData: AppData;
   onSelectClass: (grade: string, letter: string) => void;
+  pinConfig: Record<string, string>;
+  onUpdatePinConfig: (newConfig: Record<string, string>) => void;
 }
 
-export function Dashboard({ appData, onSelectClass }: DashboardProps) {
+export function Dashboard({ appData, onSelectClass, pinConfig, onUpdatePinConfig }: DashboardProps) {
   const [openYear, setOpenYear] = useState<number | null>(null);
   const [pinModalOpen, setPinModalOpen] = useState(false);
   const [helpModalOpen, setHelpModalOpen] = useState(false);
+  const [adminModalOpen, setAdminModalOpen] = useState(false);
   const [pendingSelection, setPendingSelection] = useState<{ g: number | null; l: string | null }>({ g: null, l: null });
   const [currentPin, setCurrentPin] = useState("");
   const [isError, setIsError] = useState(false);
@@ -22,7 +26,7 @@ export function Dashboard({ appData, onSelectClass }: DashboardProps) {
     if (isError) return;
     setCurrentPin(pin);
     if (pin.length === 5) {
-      if (pendingSelection.g && pin === PIN_CONFIG[pendingSelection.g.toString()]) {
+      if (pendingSelection.g && pin === pinConfig[pendingSelection.g.toString()]) {
         onSelectClass(pendingSelection.g.toString(), pendingSelection.l!);
         setPinModalOpen(false);
       } else {
@@ -56,7 +60,10 @@ export function Dashboard({ appData, onSelectClass }: DashboardProps) {
     <div className="bg-[#f8fafc] h-full overflow-y-auto">
       <div className="max-w-4xl mx-auto py-12 px-6">
         <header className="mb-12 text-center relative">
-          <div className="absolute right-0 top-0">
+          <div className="absolute right-0 top-0 flex gap-2">
+            <button onClick={() => setAdminModalOpen(true)} className="w-12 h-12 bg-white hover:bg-slate-50 rounded-full flex items-center justify-center text-slate-400 shadow-sm border border-slate-200 transition-all hover:shadow-md hover:text-escola-verde" title="Configurações Admin">
+              <Lock className="w-5 h-5" />
+            </button>
             <button onClick={() => setHelpModalOpen(true)} className="w-12 h-12 bg-white hover:bg-slate-50 rounded-full flex items-center justify-center text-slate-400 shadow-sm border border-slate-200 transition-all hover:shadow-md hover:text-escola-azul" title="Guia de Uso">
               <HelpCircle className="w-6 h-6" />
             </button>
@@ -130,6 +137,13 @@ export function Dashboard({ appData, onSelectClass }: DashboardProps) {
       <HelpModal 
         isOpen={helpModalOpen} 
         onClose={() => setHelpModalOpen(false)} 
+      />
+
+      <AdminSettingsModal
+        isOpen={adminModalOpen}
+        onClose={() => setAdminModalOpen(false)}
+        pinConfig={pinConfig}
+        onSave={onUpdatePinConfig}
       />
     </div>
   );
