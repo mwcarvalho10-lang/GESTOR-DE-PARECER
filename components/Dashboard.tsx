@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { GraduationCap, BookOpen, ChevronDown, ChevronUp } from 'lucide-react';
+import { GraduationCap, BookOpen, ChevronDown, ChevronUp, HelpCircle } from 'lucide-react';
 import { gradesArr, lettersArr, PIN_CONFIG } from '@/lib/constants';
 import { PinModal } from './PinModal';
+import { HelpModal } from './HelpModal';
 import { AppData } from '@/lib/types';
 
 interface DashboardProps {
@@ -12,6 +13,7 @@ interface DashboardProps {
 export function Dashboard({ appData, onSelectClass }: DashboardProps) {
   const [openYear, setOpenYear] = useState<number | null>(null);
   const [pinModalOpen, setPinModalOpen] = useState(false);
+  const [helpModalOpen, setHelpModalOpen] = useState(false);
   const [pendingSelection, setPendingSelection] = useState<{ g: number | null; l: string | null }>({ g: null, l: null });
   const [currentPin, setCurrentPin] = useState("");
   const [isError, setIsError] = useState(false);
@@ -53,7 +55,12 @@ export function Dashboard({ appData, onSelectClass }: DashboardProps) {
   return (
     <div className="bg-[#f8fafc] h-full overflow-y-auto">
       <div className="max-w-4xl mx-auto py-12 px-6">
-        <header className="mb-12 text-center">
+        <header className="mb-12 text-center relative">
+          <div className="absolute right-0 top-0">
+            <button onClick={() => setHelpModalOpen(true)} className="w-12 h-12 bg-white hover:bg-slate-50 rounded-full flex items-center justify-center text-slate-400 shadow-sm border border-slate-200 transition-all hover:shadow-md hover:text-escola-azul" title="Guia de Uso">
+              <HelpCircle className="w-6 h-6" />
+            </button>
+          </div>
           <div className="mb-6 flex justify-center">
             <div className="w-20 h-20 rounded-full bg-white shadow-md flex items-center justify-center border border-slate-100">
               <GraduationCap className="w-10 h-10 text-escola-verde" />
@@ -89,7 +96,8 @@ export function Dashboard({ appData, onSelectClass }: DashboardProps) {
                 {isActive && (
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-3 px-2 animate-in slide-in-from-top-2 duration-300">
                     {lettersArr.map(l => {
-                      const count = appData[`${g}${l}`]?.students?.length || 0;
+                      const classData = appData[`${g}${l}`];
+                      const count = classData?.students?.filter(s => classData[s]?.active !== false).length || 0;
                       return (
                         <div 
                           key={l} 
@@ -117,6 +125,11 @@ export function Dashboard({ appData, onSelectClass }: DashboardProps) {
         isError={isError}
         onPinChange={handlePinChange}
         onCancel={() => setPinModalOpen(false)}
+      />
+
+      <HelpModal 
+        isOpen={helpModalOpen} 
+        onClose={() => setHelpModalOpen(false)} 
       />
     </div>
   );

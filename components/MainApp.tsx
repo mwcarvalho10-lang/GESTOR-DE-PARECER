@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Home, Download, Edit3, Trash2, CheckCircle2, Menu } from 'lucide-react';
+import { Home, Download, Edit3, Trash2, CheckCircle2, Menu, Clock, HelpCircle } from 'lucide-react';
 import { AppData, Skill, ClassData } from '@/lib/types';
 import { units, subjects } from '@/lib/constants';
 import { StudentModal } from './StudentModal';
 import { SkillsModal } from './SkillsModal';
+import { HelpModal } from './HelpModal';
 import { Document, Packer, Paragraph, HeadingLevel, AlignmentType } from 'docx';
 import { saveAs } from 'file-saver';
 
@@ -26,10 +27,12 @@ export function MainApp({ currentGrade, currentLetter, appData, globalSkills, on
   const [activeTab, setActiveTab] = useState<string>("portugues");
   const [activeSubFilter, setActiveSubFilter] = useState<string>("all");
   const [searchStudent, setSearchStudent] = useState("");
+  const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'inactive'>('active');
 
   const [studentModalOpen, setStudentModalOpen] = useState(false);
   const [studentToEdit, setStudentToEdit] = useState("");
   const [skillsModalOpen, setSkillsModalOpen] = useState(false);
+  const [helpModalOpen, setHelpModalOpen] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
   const reportRef = useRef<HTMLDivElement>(null);
@@ -44,14 +47,14 @@ export function MainApp({ currentGrade, currentLetter, appData, globalSkills, on
     }
   }, [classData.students, selectedStudent]);
 
-  const handleAddStudent = (name: string) => {
+  const handleAddStudent = (name: string, active: boolean) => {
     if (!name) return;
     if (classData.students.includes(name)) {
       alert("ESTUDANTE JÁ CADASTRADO.");
       return;
     }
     const newStudents = [...classData.students, name].sort();
-    const newStudentData: any = {};
+    const newStudentData: any = { active };
     units.forEach(u => newStudentData[u] = { skills: [], observation: "" });
     
     onUpdateAppData({
@@ -66,20 +69,25 @@ export function MainApp({ currentGrade, currentLetter, appData, globalSkills, on
     setSelectedStudent(name);
   };
 
-  const handleEditStudent = (newName: string) => {
-    if (!newName || newName === studentToEdit) {
+  const handleEditStudent = (newName: string, active: boolean) => {
+    if (!newName) {
       setStudentModalOpen(false);
       return;
     }
-    if (classData.students.includes(newName)) {
+    
+    // If name changed, check if new name already exists
+    if (newName !== studentToEdit && classData.students.includes(newName)) {
       alert("JÁ EXISTE UM ALUNO COM ESTE NOME.");
       return;
     }
+
     const newStudents = classData.students.map(s => s === studentToEdit ? newName : s).sort();
-    const studentData = classData[studentToEdit];
+    const studentData = { ...classData[studentToEdit], active };
     
     const newClassData: ClassData = { ...classData, students: newStudents, [newName]: studentData };
-    delete newClassData[studentToEdit];
+    if (newName !== studentToEdit) {
+      delete newClassData[studentToEdit];
+    }
 
     onUpdateAppData({
       ...appData,
@@ -155,13 +163,21 @@ export function MainApp({ currentGrade, currentLetter, appData, globalSkills, on
     });
   };
 
-  const filteredStudents = classData.students.filter(s => s.toLowerCase().includes(searchStudent.toLowerCase()));
+  const filteredStudents = classData.students.filter(s => {
+    const matchesSearch = s.toLowerCase().includes(searchStudent.toLowerCase());
+    const isActive = classData[s]?.active !== false; // default to true if undefined
+    
+    if (statusFilter === 'active') return matchesSearch && isActive;
+    if (statusFilter === 'inactive') return matchesSearch && !isActive;
+    return matchesSearch;
+  });
 
   const getStats = () => {
-    const total = classData.students.length;
+    const activeStudents = classData.students.filter(s => classData[s]?.active !== false);
+    const total = activeStudents.length;
     if (total === 0) return "0%";
     let done = 0;
-    classData.students.forEach(s => {
+    activeStudents.forEach(s => {
       if (classData[s][selectedUnit].skills.length > 0 || classData[s][selectedUnit].observation) done++;
     });
     return Math.round((done / total) * 100) + "%";
@@ -274,12 +290,13 @@ export function MainApp({ currentGrade, currentLetter, appData, globalSkills, on
   };
 
   const exportBatchDocx = async () => {
-    if (classData.students.length === 0) return;
+    const activeStudents = classData.students.filter(s => classData[s]?.active !== false);
+    if (activeStudents.length === 0) return;
     const children = [
       new Paragraph({ text: `RELATÓRIO DE UNIDADE - ${currentGrade}º ${currentLetter} - ${selectedUnit}`, heading: HeadingLevel.HEADING_1, alignment: AlignmentType.CENTER, spacing: { after: 400 } })
     ];
     
-    classData.students.forEach(s => {
+    activeStudents.forEach(s => {
       const data = classData[s][selectedUnit];
       const selected = globalSkills
         .filter(sk => data.skills.includes(sk.id) && sk.grade === currentGrade)
@@ -325,15 +342,20 @@ export function MainApp({ currentGrade, currentLetter, appData, globalSkills, on
             </button>
           ))}
         </div>
-        <button onClick={exportBatchDocx} className="bg-escola-azul text-white px-6 py-2.5 rounded-full text-[10px] font-black uppercase shadow-lg flex items-center gap-2 transition-transform hover:scale-105 active:scale-95">
-          <Download className="w-4 h-4" /> Exportar Turma
-        </button>
+        <div className="flex items-center gap-4">
+          <button onClick={() => setHelpModalOpen(true)} className="w-10 h-10 hover:bg-slate-100 rounded-full flex items-center justify-center text-slate-400 transition-colors" title="Guia de Uso">
+            <HelpCircle className="w-5 h-5" />
+          </button>
+          <button onClick={exportBatchDocx} className="bg-escola-azul text-white px-6 py-2.5 rounded-full text-[10px] font-black uppercase shadow-lg flex items-center gap-2 transition-transform hover:scale-105 active:scale-95">
+            <Download className="w-4 h-4" /> Exportar Turma
+          </button>
+        </div>
       </header>
 
       <div className="flex flex-1 overflow-hidden bg-slate-50 p-4 gap-4">
         <aside className={`bg-white rounded-3xl border border-slate-200 flex flex-col shrink-0 transition-all duration-300 shadow-[0_8px_30px_rgb(0,0,0,0.04)] ${isSidebarOpen ? 'w-72' : 'w-0 overflow-hidden border-none opacity-0'}`}>
           <div className="w-72 flex flex-col h-full">
-            <div className="p-6">
+            <div className="p-6 pb-2">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Estudantes</h2>
                 <span className="text-[10px] font-black text-escola-verde bg-green-50 px-2 py-0.5 rounded">{getStats()}</span>
@@ -343,17 +365,46 @@ export function MainApp({ currentGrade, currentLetter, appData, globalSkills, on
                 value={searchStudent}
                 onChange={e => setSearchStudent(e.target.value)}
                 placeholder="BUSCAR..." 
-                className="w-full bg-slate-50 border-none rounded-xl px-4 py-3 text-xs font-bold uppercase outline-none"
+                className="w-full bg-slate-50 border-none rounded-xl px-4 py-3 text-xs font-bold uppercase outline-none mb-3"
               />
+              <div className="flex gap-1 bg-slate-100 p-1 rounded-xl">
+                <button 
+                  onClick={() => setStatusFilter('active')}
+                  className={`flex-1 py-1.5 text-[9px] font-black uppercase rounded-lg transition-all ${statusFilter === 'active' ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+                >
+                  Ativos
+                </button>
+                <button 
+                  onClick={() => setStatusFilter('inactive')}
+                  className={`flex-1 py-1.5 text-[9px] font-black uppercase rounded-lg transition-all ${statusFilter === 'inactive' ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+                >
+                  Inativos
+                </button>
+                <button 
+                  onClick={() => setStatusFilter('all')}
+                  className={`flex-1 py-1.5 text-[9px] font-black uppercase rounded-lg transition-all ${statusFilter === 'all' ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+                >
+                  Todos
+                </button>
+              </div>
             </div>
-            <div className="flex-1 overflow-y-auto px-4 space-y-1 pb-6">
-              {filteredStudents.map(s => (
+            <div className="flex-1 overflow-y-auto px-4 space-y-1 pb-6 mt-2">
+              {filteredStudents.map(s => {
+                const isDone = classData[s]?.[selectedUnit]?.skills?.length > 0 || classData[s]?.[selectedUnit]?.observation?.trim()?.length > 0;
+                const isActive = classData[s]?.active !== false;
+
+                return (
                 <div key={s} className="group relative flex items-center">
                   <button 
                     onClick={() => setSelectedStudent(s)} 
-                    className={`flex-1 text-left px-4 py-3 rounded-xl text-[11px] font-bold transition-all ${selectedStudent === s ? 'bg-escola-azul text-white shadow-md' : 'text-slate-500 hover:bg-slate-50'}`}
+                    className={`flex-1 flex items-center gap-2 text-left px-4 py-3 rounded-xl text-[11px] font-bold transition-all ${selectedStudent === s ? 'bg-escola-azul text-white shadow-md' : 'text-slate-500 hover:bg-slate-50'}`}
                   >
-                    <span className="truncate uppercase block pr-14">{s}</span>
+                    {isDone ? (
+                      <CheckCircle2 className={`w-3.5 h-3.5 shrink-0 ${selectedStudent === s ? 'text-white' : 'text-escola-verde'}`} />
+                    ) : (
+                      <Clock className={`w-3.5 h-3.5 shrink-0 ${selectedStudent === s ? 'text-white/70' : 'text-amber-400'}`} />
+                    )}
+                    <span className={`truncate uppercase block pr-14 ${!isActive ? 'line-through opacity-60' : ''}`}>{s}</span>
                   </button>
                   <div className="absolute right-2 top-1/2 -translate-y-1/2 hidden group-hover:flex gap-1 z-20">
                     <button onClick={(e) => { e.stopPropagation(); setStudentToEdit(s); setStudentModalOpen(true); }} className="w-7 h-7 bg-white/90 rounded-lg flex items-center justify-center text-slate-500 hover:text-escola-azul shadow-sm border border-slate-200 hover:border-slate-300 transition-colors">
@@ -364,7 +415,7 @@ export function MainApp({ currentGrade, currentLetter, appData, globalSkills, on
                     </button>
                   </div>
                 </div>
-              ))}
+              )})}
             </div>
             <div className="p-4 border-t border-slate-100">
               <button onClick={() => { setStudentToEdit(""); setStudentModalOpen(true); }} className="w-full py-3 rounded-xl border border-dashed border-slate-300 text-slate-500 text-[10px] font-black uppercase hover:text-escola-azul hover:border-escola-azul/40 hover:bg-slate-50 transition-colors">
@@ -463,6 +514,7 @@ export function MainApp({ currentGrade, currentLetter, appData, globalSkills, on
       <StudentModal 
         isOpen={studentModalOpen} 
         initialName={studentToEdit} 
+        initialActive={studentToEdit ? classData[studentToEdit]?.active !== false : true}
         onClose={() => setStudentModalOpen(false)} 
         onConfirm={studentToEdit ? handleEditStudent : handleAddStudent} 
       />
@@ -477,6 +529,11 @@ export function MainApp({ currentGrade, currentLetter, appData, globalSkills, on
           newSkills.splice(idx, 1);
           onUpdateGlobalSkills(newSkills);
         }}
+      />
+
+      <HelpModal 
+        isOpen={helpModalOpen} 
+        onClose={() => setHelpModalOpen(false)} 
       />
     </div>
   );
