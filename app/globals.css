@@ -1,0 +1,23 @@
+@import "tailwindcss";
+
+@theme {
+  --color-escola-azul: #005bb7;
+  --color-escola-verde: #7fb432;
+  --color-bg-main: #fcfdfe;
+  --font-sans: var(--font-plus-jakarta), ui-sans-serif, system-ui, sans-serif;
+}
+
+:root {
+  --escola-azul: #005bb7;
+  --escola-verde: #7fb432;
+  --bg-main: #fcfdfe;
+}
+
+body {
+  background-color: var(--bg-main);
+  color: #1e293b;
+  font-size: 13px;
+}
+
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
