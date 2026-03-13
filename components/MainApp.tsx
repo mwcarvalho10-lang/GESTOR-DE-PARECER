@@ -295,7 +295,7 @@ export function MainApp({ currentGrade, currentLetter, appData, globalSkills, on
       </header>
 
       <div className="flex flex-1 overflow-hidden">
-        <aside className={`bg-white border-r flex flex-col shrink-0 transition-all duration-300 ${isSidebarOpen ? 'w-72' : 'w-0 overflow-hidden border-none'}`}>
+        <aside className={`bg-white border-r-4 border-escola-azul flex flex-col shrink-0 transition-all duration-300 ${isSidebarOpen ? 'w-72' : 'w-0 overflow-hidden border-none'}`}>
           <div className="w-72 flex flex-col h-full">
             <div className="p-6">
               <div className="flex items-center justify-between mb-4">
@@ -320,18 +320,18 @@ export function MainApp({ currentGrade, currentLetter, appData, globalSkills, on
                     <span className="truncate uppercase block pr-14">{s}</span>
                   </button>
                   <div className="absolute right-2 top-1/2 -translate-y-1/2 hidden group-hover:flex gap-1 z-20">
-                    <button onClick={(e) => { e.stopPropagation(); setStudentToEdit(s); setStudentModalOpen(true); }} className="w-7 h-7 bg-white/90 rounded-lg flex items-center justify-center text-slate-500 hover:text-escola-azul shadow-sm border border-slate-100 transition-colors">
+                    <button onClick={(e) => { e.stopPropagation(); setStudentToEdit(s); setStudentModalOpen(true); }} className="w-7 h-7 bg-white/90 rounded-lg flex items-center justify-center text-slate-500 hover:text-escola-azul shadow-sm border-2 border-escola-azul/20 hover:border-escola-azul transition-colors">
                       <Edit3 className="w-3.5 h-3.5" />
                     </button>
-                    <button onClick={(e) => handleDeleteStudent(s, e)} className="w-7 h-7 bg-white/90 rounded-lg flex items-center justify-center text-slate-500 hover:text-red-500 shadow-sm border border-slate-100 transition-colors">
+                    <button onClick={(e) => handleDeleteStudent(s, e)} className="w-7 h-7 bg-white/90 rounded-lg flex items-center justify-center text-slate-500 hover:text-red-500 shadow-sm border-2 border-escola-azul/20 hover:border-red-500 transition-colors">
                       <Trash2 className="w-3.5 h-3.5" />
                     </button>
                   </div>
                 </div>
               ))}
             </div>
-            <div className="p-4 border-t">
-              <button onClick={() => { setStudentToEdit(""); setStudentModalOpen(true); }} className="w-full py-3 rounded-xl border-2 border-dashed border-slate-200 text-slate-400 text-[10px] font-black uppercase hover:bg-slate-50 transition-colors">
+            <div className="p-4 border-t-4 border-escola-azul">
+              <button onClick={() => { setStudentToEdit(""); setStudentModalOpen(true); }} className="w-full py-3 rounded-xl border-2 border-dashed border-escola-azul/40 text-escola-azul text-[10px] font-black uppercase hover:bg-blue-50 transition-colors">
                 + Estudante
               </button>
             </div>
@@ -339,7 +339,7 @@ export function MainApp({ currentGrade, currentLetter, appData, globalSkills, on
         </aside>
 
         <main className="flex-1 flex flex-col overflow-hidden bg-slate-50/30">
-          <nav className="h-14 bg-white border-b flex items-center px-8 gap-8 shrink-0">
+          <nav className="h-14 bg-white border-b-4 border-escola-azul flex items-center px-8 gap-8 shrink-0">
             {subjects.map(sub => (
               <button 
                 key={sub.id} 
@@ -347,7 +347,7 @@ export function MainApp({ currentGrade, currentLetter, appData, globalSkills, on
                 className={`relative py-4 text-[11px] font-black uppercase transition-all ${activeTab === sub.id ? 'text-escola-azul' : 'text-slate-400 hover:text-slate-600'}`}
               >
                 {sub.label}
-                {activeTab === sub.id && <div className="absolute bottom-[-1px] left-0 w-full h-[3px] bg-escola-verde rounded-t-lg" />}
+                {activeTab === sub.id && <div className="absolute bottom-[-4px] left-0 w-full h-[4px] bg-escola-verde rounded-t-lg" />}
               </button>
             ))}
           </nav>
@@ -358,25 +358,23 @@ export function MainApp({ currentGrade, currentLetter, appData, globalSkills, on
                 <h3 className="text-[10px] font-black text-escola-azul uppercase tracking-widest">Habilidades</h3>
                 <button onClick={() => setSkillsModalOpen(true)} className="text-[9px] font-black text-escola-verde hover:underline">GERENCIAR HABILIDADES</button>
               </div>
-              <div className="flex flex-wrap gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
                 {currentSkills.map(s => {
                   const isSet = currentStudentData?.skills.includes(s.id);
                   return (
                     <div 
                       key={s.id} 
                       onClick={() => toggleSkill(s.id)} 
-                      className={`group relative px-4 py-3 bg-white border-2 rounded-xl cursor-pointer transition-all shadow-sm flex items-center justify-center min-w-[100px] ${isSet ? 'border-escola-verde bg-green-50/20 ring-2 ring-green-100' : 'border-slate-100 hover:border-slate-300'}`}
-                      style={!isSet ? { borderBottom: `3px solid ${s.color || '#f1f5f9'}` } : {}}
+                      className={`group relative px-4 py-3 bg-white border-4 rounded-xl cursor-pointer transition-all shadow-sm flex flex-col gap-1.5 ${isSet ? 'border-escola-verde bg-green-50/20 ring-1 ring-green-100' : 'border-escola-azul/20 hover:border-escola-azul/60'}`}
+                      style={!isSet ? { borderBottom: `4px solid ${s.color || '#f1f5f9'}` } : {}}
                     >
-                      <span className={`text-[11px] font-black uppercase ${isSet ? 'text-escola-verde' : 'text-slate-500'}`}>{s.id}</span>
-                      {isSet && <CheckCircle2 className="ml-2 w-3.5 h-3.5 text-escola-verde" />}
-                      
-                      {/* Minimalist Flashcard Tooltip */}
-                      <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 w-64 p-5 bg-white border border-slate-200 text-slate-700 text-xs font-bold leading-relaxed rounded-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50 pointer-events-none shadow-2xl origin-bottom scale-95 group-hover:scale-100">
-                        <div className="text-[10px] font-black text-escola-azul uppercase tracking-widest mb-2">{s.id}</div>
-                        {s.report}
-                        <div className="absolute top-full left-1/2 -translate-x-1/2 border-8 border-transparent border-t-white"></div>
+                      <div className="flex items-center justify-between w-full">
+                        <span className={`text-[11px] font-black uppercase ${isSet ? 'text-escola-verde' : 'text-slate-600'}`}>{s.id}</span>
+                        {isSet && <CheckCircle2 className="w-3.5 h-3.5 text-escola-verde shrink-0" />}
                       </div>
+                      <span className={`text-[10px] leading-relaxed font-medium ${isSet ? 'text-slate-700' : 'text-slate-400'}`}>
+                        {s.report}
+                      </span>
                     </div>
                   );
                 })}
@@ -384,7 +382,7 @@ export function MainApp({ currentGrade, currentLetter, appData, globalSkills, on
             </section>
 
             <section className="max-w-5xl mx-auto w-full pb-20">
-              <div className="bg-white rounded-3xl shadow-xl border-t-4 border-escola-azul overflow-hidden">
+              <div className="bg-white rounded-3xl shadow-xl border-4 border-escola-azul overflow-hidden">
                 <div className="bg-slate-900 p-6 flex justify-between items-center text-white">
                   <span className="text-xs font-black uppercase">{selectedStudent || "--"}</span>
                   <div className="flex gap-4">
@@ -402,7 +400,7 @@ export function MainApp({ currentGrade, currentLetter, appData, globalSkills, on
                     contentEditable={!!selectedStudent} 
                     onInput={handleManualEdit}
                     onBlur={handleManualEdit}
-                    className="font-['Plus_Jakarta_Sans'] leading-[1.8] text-[14px] outline-none p-[30px] rounded-xl uppercase text-justify bg-white border border-[#eef2f6] text-black min-h-[350px]"
+                    className="font-['Plus_Jakarta_Sans'] leading-[1.8] text-[14px] outline-none p-[30px] rounded-xl uppercase text-justify bg-white border-4 border-escola-azul/20 focus:border-escola-azul text-black min-h-[350px] transition-colors"
                   />
                 </div>
               </div>

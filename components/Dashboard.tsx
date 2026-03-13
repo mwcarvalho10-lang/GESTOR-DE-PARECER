@@ -94,7 +94,7 @@ export function Dashboard({ appData, onSelectClass }: DashboardProps) {
                         <div 
                           key={l} 
                           onClick={() => openPinModal(g, l)} 
-                          className="bg-white p-4 rounded-xl border-2 border-slate-50 cursor-pointer hover:border-slate-200 text-center group transition-all"
+                          className="bg-white p-4 rounded-xl border-2 border-escola-azul/10 cursor-pointer hover:border-escola-azul/40 text-center group transition-all"
                         >
                           <span className="block text-xl font-black text-slate-800 uppercase group-hover:text-escola-azul transition-colors">{l}</span>
                           <span className="text-[8px] font-black text-slate-300 uppercase">{count} Alunos</span>
