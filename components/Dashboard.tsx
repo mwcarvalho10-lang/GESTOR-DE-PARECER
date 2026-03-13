@@ -55,7 +55,7 @@ export function Dashboard({ appData, onSelectClass }: DashboardProps) {
       <div className="max-w-4xl mx-auto py-12 px-6">
         <header className="mb-12 text-center">
           <div className="mb-6 flex justify-center">
-            <div className="w-20 h-20 rounded-full bg-white shadow-xl flex items-center justify-center border-4 border-escola-verde">
+            <div className="w-20 h-20 rounded-full bg-white shadow-md flex items-center justify-center border border-slate-100">
               <GraduationCap className="w-10 h-10 text-escola-verde" />
             </div>
           </div>
@@ -71,8 +71,8 @@ export function Dashboard({ appData, onSelectClass }: DashboardProps) {
               <div key={g} style={{ '--grade-color': gradeColor } as React.CSSProperties}>
                 <button 
                   onClick={() => setOpenYear(isActive ? null : g)} 
-                  className={`w-full flex items-center justify-between p-6 rounded-2xl bg-slate-50 border-2 transition-all duration-300 ${isActive ? 'bg-white shadow-md' : 'border-transparent hover:bg-white'}`}
-                  style={{ borderColor: isActive ? gradeColor : undefined }}
+                  className={`w-full flex items-center justify-between p-6 rounded-2xl bg-white border transition-all duration-300 ${isActive ? 'shadow-md border-escola-verde/30 ring-1 ring-escola-verde/20' : 'border-slate-200 hover:shadow-md hover:border-slate-300'}`}
+                  style={{ borderLeftColor: isActive ? gradeColor : undefined, borderLeftWidth: isActive ? '4px' : '1px' }}
                 >
                   <div className="flex items-center gap-4">
                     <div className={`w-10 h-10 relative flex items-center justify-center rounded-xl transition-all duration-300 ${isActive ? 'text-white' : 'bg-[#f1f5f9] text-slate-500'}`} style={{ backgroundColor: isActive ? gradeColor : undefined }}>
@@ -94,7 +94,7 @@ export function Dashboard({ appData, onSelectClass }: DashboardProps) {
                         <div 
                           key={l} 
                           onClick={() => openPinModal(g, l)} 
-                          className="bg-white p-4 rounded-xl border-2 border-escola-azul/10 cursor-pointer hover:border-escola-azul/40 text-center group transition-all"
+                          className="bg-white p-4 rounded-xl border border-slate-200 cursor-pointer hover:border-slate-300 hover:shadow-md text-center group transition-all"
                         >
                           <span className="block text-xl font-black text-slate-800 uppercase group-hover:text-escola-azul transition-colors">{l}</span>
                           <span className="text-[8px] font-black text-slate-300 uppercase">{count} Alunos</span>

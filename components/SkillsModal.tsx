@@ -67,8 +67,8 @@ export function SkillsModal({ isOpen, onClose, globalSkills, onSaveSkill, onDele
 
   return (
     <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-[10000]">
-      <div className="bg-white rounded-3xl w-[95vw] h-[90vh] max-w-6xl shadow-2xl flex flex-col overflow-hidden border-4 border-escola-azul">
-        <header className="p-6 border-b-4 border-escola-azul flex justify-between items-center bg-white shadow-sm z-10">
+      <div className="bg-white rounded-3xl w-[95vw] h-[90vh] max-w-6xl shadow-2xl flex flex-col overflow-hidden border border-slate-100">
+        <header className="p-6 border-b border-slate-200 flex justify-between items-center bg-white shadow-sm z-10">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-escola-azul/10 rounded-xl flex items-center justify-center text-escola-azul">
               <Settings className="w-5 h-5" />
@@ -84,7 +84,7 @@ export function SkillsModal({ isOpen, onClose, globalSkills, onSaveSkill, onDele
         </header>
         
         <div className="flex-1 flex overflow-hidden">
-          <aside className="w-80 bg-slate-50 p-6 border-r-4 border-escola-azul space-y-6 overflow-y-auto shrink-0">
+          <aside className="w-80 bg-slate-50 p-6 border-r border-slate-200 space-y-6 overflow-y-auto shrink-0">
             <div>
               <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">Cadastrar Nova</h4>
               <div className="space-y-3">
@@ -93,14 +93,14 @@ export function SkillsModal({ isOpen, onClose, globalSkills, onSaveSkill, onDele
                   value={newSkillId}
                   onChange={e => setNewSkillId(e.target.value)}
                   placeholder="CÓDIGO (BNCC)" 
-                  className="w-full p-3.5 bg-white border-2 border-escola-azul/20 rounded-xl text-xs font-bold uppercase outline-none focus:border-escola-azul transition-colors"
+                  className="w-full p-3.5 bg-white border border-slate-200 rounded-xl text-xs font-bold uppercase outline-none focus:ring-2 focus:ring-slate-200 focus:border-slate-300 transition-all shadow-sm"
                 />
                 
                 <div className="grid grid-cols-2 gap-2">
-                  <select value={newSkillGrade} onChange={e => setNewSkillGrade(e.target.value)} className="p-3 bg-white border-2 border-escola-azul/20 rounded-xl text-[10px] font-black uppercase outline-none focus:border-escola-azul transition-colors">
+                  <select value={newSkillGrade} onChange={e => setNewSkillGrade(e.target.value)} className="p-3 bg-white border border-slate-200 rounded-xl text-[10px] font-black uppercase outline-none focus:ring-2 focus:ring-slate-200 focus:border-slate-300 transition-all shadow-sm">
                     {gradesArr.map(g => <option key={g} value={g}>{g}º Ano</option>)}
                   </select>
-                  <select value={newSkillSubject} onChange={e => setNewSkillSubject(e.target.value)} className="p-3 bg-white border-2 border-escola-azul/20 rounded-xl text-[10px] font-black uppercase outline-none focus:border-escola-azul transition-colors">
+                  <select value={newSkillSubject} onChange={e => setNewSkillSubject(e.target.value)} className="p-3 bg-white border border-slate-200 rounded-xl text-[10px] font-black uppercase outline-none focus:ring-2 focus:ring-slate-200 focus:border-slate-300 transition-all shadow-sm">
                     {subjects.map(s => <option key={s.id} value={s.id}>{s.label}</option>)}
                   </select>
                 </div>
@@ -109,10 +109,10 @@ export function SkillsModal({ isOpen, onClose, globalSkills, onSaveSkill, onDele
                   value={newSkillReport}
                   onChange={e => setNewSkillReport(e.target.value)}
                   placeholder="TEXTO DO PARECER..." 
-                  className="w-full p-4 bg-white border-2 border-escola-azul/20 rounded-xl text-xs font-bold h-32 uppercase outline-none resize-none focus:border-escola-azul transition-colors"
+                  className="w-full p-4 bg-white border border-slate-200 rounded-xl text-xs font-bold h-32 uppercase outline-none resize-none focus:ring-2 focus:ring-slate-200 focus:border-slate-300 transition-all shadow-sm"
                 />
                 
-                <div className="p-4 bg-white rounded-xl border-2 border-escola-azul/20">
+                <div className="p-4 bg-white rounded-xl border border-slate-200 shadow-sm">
                   <label className="text-[9px] font-black text-slate-400 uppercase block mb-3">Identificador Visual da Matéria</label>
                   <div className="flex flex-wrap items-center gap-2">
                     {subjectPalettes[newSkillSubject].map((c, idx) => (
@@ -140,15 +140,15 @@ export function SkillsModal({ isOpen, onClose, globalSkills, onSaveSkill, onDele
           </aside>
 
           <div className="flex-1 flex flex-col bg-white overflow-hidden">
-            <div className="p-4 border-b-4 border-escola-azul flex flex-wrap gap-4 items-center justify-between bg-slate-50/50 shrink-0">
+            <div className="p-4 border-b border-slate-200 flex flex-wrap gap-4 items-center justify-between bg-slate-50/50 shrink-0">
               <div className="flex gap-2">
-                <div className="flex bg-white p-1 rounded-xl border-2 border-escola-azul/20 shadow-sm">
+                <div className="flex bg-white p-1 rounded-xl border border-slate-200 shadow-sm">
                   <button onClick={() => setFilterGrade('all')} className={`px-3 py-1.5 rounded-lg text-[9px] font-black uppercase transition-all ${filterGrade === 'all' ? 'bg-slate-900 text-white' : 'text-slate-400 hover:bg-slate-50'}`}>Todos</button>
                   {gradesArr.map(g => (
                     <button key={g} onClick={() => setFilterGrade(g.toString())} className={`px-3 py-1.5 rounded-lg text-[9px] font-black uppercase transition-all ${filterGrade === g.toString() ? 'bg-slate-900 text-white' : 'text-slate-400 hover:bg-slate-50'}`}>{g}º</button>
                   ))}
                 </div>
-                <div className="flex bg-white p-1 rounded-xl border-2 border-escola-azul/20 shadow-sm">
+                <div className="flex bg-white p-1 rounded-xl border border-slate-200 shadow-sm">
                   <button onClick={() => setFilterSubject('all')} className={`px-3 py-1.5 rounded-lg text-[9px] font-black uppercase transition-all ${filterSubject === 'all' ? 'bg-slate-900 text-white' : 'text-slate-400 hover:bg-slate-50'}`}>Todas</button>
                   {subjects.map(s => (
                     <button key={s.id} onClick={() => setFilterSubject(s.id)} className={`px-3 py-1.5 rounded-lg text-[9px] font-black uppercase transition-all ${filterSubject === s.id ? 'bg-slate-900 text-white' : 'text-slate-400 hover:bg-slate-50'}`}>{s.label.split('/')[0]}</button>
@@ -161,7 +161,7 @@ export function SkillsModal({ isOpen, onClose, globalSkills, onSaveSkill, onDele
                   value={searchQuery}
                   onChange={e => setSearchQuery(e.target.value)}
                   placeholder="FILTRAR TEXTO..." 
-                  className="pl-10 pr-4 py-2 bg-white border-2 border-escola-azul/20 rounded-lg text-[10px] font-bold uppercase outline-none focus:border-escola-azul transition-colors"
+                  className="pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-lg text-[10px] font-bold uppercase outline-none focus:ring-2 focus:ring-slate-200 focus:border-slate-300 transition-all shadow-sm"
                 />
                 <Search className="w-4 h-4 absolute left-3 top-2.5 text-slate-400" />
               </div>
@@ -169,7 +169,7 @@ export function SkillsModal({ isOpen, onClose, globalSkills, onSaveSkill, onDele
             
             <div className="flex-1 p-6 overflow-y-auto grid grid-cols-1 lg:grid-cols-2 gap-4 content-start">
               {filteredSkills.map((s, idx) => (
-                <div key={idx} className="p-5 bg-white rounded-2xl border-l-8 shadow-sm border-2 border-escola-azul/20 relative group transition-all hover:shadow-md hover:border-escola-azul/40" style={{ borderLeftColor: s.color || '#cbd5e1' }}>
+                <div key={idx} className="p-5 bg-white rounded-2xl border shadow-sm border-slate-200 relative group transition-all hover:shadow-md hover:border-slate-300" style={{ borderLeftColor: s.color || '#cbd5e1', borderLeftWidth: '4px' }}>
                   <button onClick={() => { if(confirm("EXCLUIR HABILIDADE?")) onDeleteSkill(globalSkills.indexOf(s)); }} className="absolute top-4 right-4 text-slate-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all">
                     <Trash2 className="w-4 h-4" />
                   </button>
@@ -182,7 +182,7 @@ export function SkillsModal({ isOpen, onClose, globalSkills, onSaveSkill, onDele
               ))}
             </div>
             
-            <footer className="p-4 border-t-4 border-escola-azul bg-slate-50 flex justify-between items-center shrink-0">
+            <footer className="p-4 border-t border-slate-200 bg-slate-50 flex justify-between items-center shrink-0">
               <span className="text-[10px] font-black text-slate-400 uppercase">{filteredSkills.length} Habilidades</span>
               <div className="flex gap-2">
                 <button onClick={exportSkillsJSON} className="text-[9px] font-bold text-slate-500 uppercase hover:text-escola-azul">Exportar Backup</button>

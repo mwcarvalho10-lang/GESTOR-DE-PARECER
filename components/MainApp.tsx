@@ -24,6 +24,7 @@ export function MainApp({ currentGrade, currentLetter, appData, globalSkills, on
   const [selectedStudent, setSelectedStudent] = useState<string>(classData.students[0] || "");
   const [selectedUnit, setSelectedUnit] = useState<string>("Diagnóstica");
   const [activeTab, setActiveTab] = useState<string>("portugues");
+  const [activeSubFilter, setActiveSubFilter] = useState<string>("all");
   const [searchStudent, setSearchStudent] = useState("");
 
   const [studentModalOpen, setStudentModalOpen] = useState(false);
@@ -32,6 +33,10 @@ export function MainApp({ currentGrade, currentLetter, appData, globalSkills, on
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
   const reportRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setActiveSubFilter("all");
+  }, [activeTab, currentGrade]);
 
   useEffect(() => {
     if (!classData.students.includes(selectedStudent)) {
@@ -163,9 +168,40 @@ export function MainApp({ currentGrade, currentLetter, appData, globalSkills, on
   };
 
   const currentStudentData = selectedStudent ? classData[selectedStudent][selectedUnit] : null;
-  const currentSkills = globalSkills
+  
+  const subjectSubFilters: Record<string, { id: string, label: string, match: (id: string) => boolean }[]> = {
+    portugues: currentGrade === '1' ? [
+      { id: 'all', label: 'Todas', match: () => true },
+      { id: 'leitura', label: 'Leitura (1-3)', match: (id: string) => { const m = id.match(/\d+$/); if(!m) return false; const n = parseInt(m[0], 10); return n >= 1 && n <= 3; } },
+      { id: 'producao', label: 'Produção de Texto (4-9)', match: (id: string) => { const m = id.match(/\d+$/); if(!m) return false; const n = parseInt(m[0], 10); return n >= 4 && n <= 9; } },
+      { id: 'oralidade', label: 'Comunicação Oral (10)', match: (id: string) => { const m = id.match(/\d+$/); if(!m) return false; const n = parseInt(m[0], 10); return n === 10; } },
+      { id: 'analise', label: 'Análise e Reflexão (11-17)', match: (id: string) => { const m = id.match(/\d+$/); if(!m) return false; const n = parseInt(m[0], 10); return n >= 11 && n <= 17; } },
+    ] : [],
+    matematica: currentGrade === '1' ? [
+      { id: 'all', label: 'Todas', match: () => true },
+      { id: 'aprendizagens', label: 'Aprendizagens Gerais (1)', match: (id: string) => { const m = id.match(/\d+$/); if(!m) return false; const n = parseInt(m[0], 10); return n === 1; } },
+      { id: 'numeros', label: 'Números e Operações (2-7)', match: (id: string) => { const m = id.match(/\d+$/); if(!m) return false; const n = parseInt(m[0], 10); return n >= 2 && n <= 7; } },
+      { id: 'espaco', label: 'Espaço e Forma (8-9)', match: (id: string) => { const m = id.match(/\d+$/); if(!m) return false; const n = parseInt(m[0], 10); return n >= 8 && n <= 9; } },
+      { id: 'grandezas', label: 'Grandezas e Medidas (10-12)', match: (id: string) => { const m = id.match(/\d+$/); if(!m) return false; const n = parseInt(m[0], 10); return n >= 10 && n <= 12; } },
+      { id: 'tratamento', label: 'Tratamento da Informação (13-14)', match: (id: string) => { const m = id.match(/\d+$/); if(!m) return false; const n = parseInt(m[0], 10); return n >= 13 && n <= 14; } },
+    ] : [],
+    historia: [
+      { id: 'all', label: 'Todas', match: () => true },
+      { id: 'historia', label: 'História', match: (id: string) => id.includes('HI') },
+      { id: 'geografia', label: 'Geografia', match: (id: string) => id.includes('GE') },
+    ]
+  };
+
+  let currentSkills = globalSkills
     .filter(s => s.subject === activeTab && s.grade === currentGrade)
     .sort((a, b) => a.id.localeCompare(b.id));
+
+  if (subjectSubFilters[activeTab] && subjectSubFilters[activeTab].length > 0) {
+    const activeFilterObj = subjectSubFilters[activeTab].find(f => f.id === activeSubFilter);
+    if (activeFilterObj && activeFilterObj.id !== 'all') {
+      currentSkills = currentSkills.filter(s => activeFilterObj.match(s.id));
+    }
+  }
 
   const subjectOrder = ['portugues', 'matematica', 'ciencias', 'historia'];
 
@@ -265,7 +301,7 @@ export function MainApp({ currentGrade, currentLetter, appData, globalSkills, on
 
   return (
     <div className="h-full flex flex-col">
-      <header className="h-16 bg-white flex items-center justify-between px-6 shrink-0 border-b-4 border-escola-azul z-50">
+      <header className="h-16 bg-white flex items-center justify-between px-6 shrink-0 border-b border-slate-200 shadow-sm z-50">
         <div className="flex items-center gap-4">
           <button onClick={onGoBack} className="w-10 h-10 hover:bg-slate-100 rounded-full flex items-center justify-center text-slate-400">
             <Home className="w-5 h-5" />
@@ -294,8 +330,8 @@ export function MainApp({ currentGrade, currentLetter, appData, globalSkills, on
         </button>
       </header>
 
-      <div className="flex flex-1 overflow-hidden">
-        <aside className={`bg-white border-r-4 border-escola-azul flex flex-col shrink-0 transition-all duration-300 ${isSidebarOpen ? 'w-72' : 'w-0 overflow-hidden border-none'}`}>
+      <div className="flex flex-1 overflow-hidden bg-slate-50 p-4 gap-4">
+        <aside className={`bg-white rounded-3xl border border-slate-200 flex flex-col shrink-0 transition-all duration-300 shadow-[0_8px_30px_rgb(0,0,0,0.04)] ${isSidebarOpen ? 'w-72' : 'w-0 overflow-hidden border-none opacity-0'}`}>
           <div className="w-72 flex flex-col h-full">
             <div className="p-6">
               <div className="flex items-center justify-between mb-4">
@@ -320,26 +356,26 @@ export function MainApp({ currentGrade, currentLetter, appData, globalSkills, on
                     <span className="truncate uppercase block pr-14">{s}</span>
                   </button>
                   <div className="absolute right-2 top-1/2 -translate-y-1/2 hidden group-hover:flex gap-1 z-20">
-                    <button onClick={(e) => { e.stopPropagation(); setStudentToEdit(s); setStudentModalOpen(true); }} className="w-7 h-7 bg-white/90 rounded-lg flex items-center justify-center text-slate-500 hover:text-escola-azul shadow-sm border-2 border-escola-azul/20 hover:border-escola-azul transition-colors">
+                    <button onClick={(e) => { e.stopPropagation(); setStudentToEdit(s); setStudentModalOpen(true); }} className="w-7 h-7 bg-white/90 rounded-lg flex items-center justify-center text-slate-500 hover:text-escola-azul shadow-sm border border-slate-200 hover:border-slate-300 transition-colors">
                       <Edit3 className="w-3.5 h-3.5" />
                     </button>
-                    <button onClick={(e) => handleDeleteStudent(s, e)} className="w-7 h-7 bg-white/90 rounded-lg flex items-center justify-center text-slate-500 hover:text-red-500 shadow-sm border-2 border-escola-azul/20 hover:border-red-500 transition-colors">
+                    <button onClick={(e) => handleDeleteStudent(s, e)} className="w-7 h-7 bg-white/90 rounded-lg flex items-center justify-center text-slate-500 hover:text-red-500 shadow-sm border border-slate-200 hover:border-red-200 hover:bg-red-50 transition-colors">
                       <Trash2 className="w-3.5 h-3.5" />
                     </button>
                   </div>
                 </div>
               ))}
             </div>
-            <div className="p-4 border-t-4 border-escola-azul">
-              <button onClick={() => { setStudentToEdit(""); setStudentModalOpen(true); }} className="w-full py-3 rounded-xl border-2 border-dashed border-escola-azul/40 text-escola-azul text-[10px] font-black uppercase hover:bg-blue-50 transition-colors">
+            <div className="p-4 border-t border-slate-100">
+              <button onClick={() => { setStudentToEdit(""); setStudentModalOpen(true); }} className="w-full py-3 rounded-xl border border-dashed border-slate-300 text-slate-500 text-[10px] font-black uppercase hover:text-escola-azul hover:border-escola-azul/40 hover:bg-slate-50 transition-colors">
                 + Estudante
               </button>
             </div>
           </div>
         </aside>
 
-        <main className="flex-1 flex flex-col overflow-hidden bg-slate-50/30">
-          <nav className="h-14 bg-white border-b-4 border-escola-azul flex items-center px-8 gap-8 shrink-0">
+        <main className="flex-1 flex flex-col overflow-hidden bg-white rounded-3xl border border-slate-200 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
+          <nav className="h-14 bg-white border-b border-slate-100 flex items-center px-8 gap-8 shrink-0">
             {subjects.map(sub => (
               <button 
                 key={sub.id} 
@@ -358,6 +394,21 @@ export function MainApp({ currentGrade, currentLetter, appData, globalSkills, on
                 <h3 className="text-[10px] font-black text-escola-azul uppercase tracking-widest">Habilidades</h3>
                 <button onClick={() => setSkillsModalOpen(true)} className="text-[9px] font-black text-escola-verde hover:underline">GERENCIAR HABILIDADES</button>
               </div>
+
+              {subjectSubFilters[activeTab] && subjectSubFilters[activeTab].length > 0 && (
+                <div className="flex flex-wrap gap-2 mb-6">
+                  {subjectSubFilters[activeTab].map(filter => (
+                    <button
+                      key={filter.id}
+                      onClick={() => setActiveSubFilter(filter.id)}
+                      className={`px-4 py-1.5 rounded-full text-[9px] font-black uppercase transition-all ${activeSubFilter === filter.id ? 'bg-slate-800 text-white shadow-md' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}
+                    >
+                      {filter.label}
+                    </button>
+                  ))}
+                </div>
+              )}
+
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
                 {currentSkills.map(s => {
                   const isSet = currentStudentData?.skills.includes(s.id);
@@ -365,8 +416,8 @@ export function MainApp({ currentGrade, currentLetter, appData, globalSkills, on
                     <div 
                       key={s.id} 
                       onClick={() => toggleSkill(s.id)} 
-                      className={`group relative px-4 py-3 bg-white border-4 rounded-xl cursor-pointer transition-all shadow-sm flex flex-col gap-1.5 ${isSet ? 'border-escola-verde bg-green-50/20 ring-1 ring-green-100' : 'border-escola-azul/20 hover:border-escola-azul/60'}`}
-                      style={!isSet ? { borderBottom: `4px solid ${s.color || '#f1f5f9'}` } : {}}
+                      className={`group relative px-5 py-4 bg-white border rounded-2xl cursor-pointer transition-all duration-300 shadow-sm flex flex-col gap-1.5 ${isSet ? 'border-escola-verde/30 bg-green-50/50' : 'border-slate-200 hover:border-slate-300 hover:shadow-md'}`}
+                      style={{ borderLeftColor: s.color || '#cbd5e1', borderLeftWidth: '4px' }}
                     >
                       <div className="flex items-center justify-between w-full">
                         <span className={`text-[11px] font-black uppercase ${isSet ? 'text-escola-verde' : 'text-slate-600'}`}>{s.id}</span>
@@ -382,7 +433,7 @@ export function MainApp({ currentGrade, currentLetter, appData, globalSkills, on
             </section>
 
             <section className="max-w-5xl mx-auto w-full pb-20">
-              <div className="bg-white rounded-3xl shadow-xl border-4 border-escola-azul overflow-hidden">
+              <div className="bg-white rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-200 overflow-hidden">
                 <div className="bg-slate-900 p-6 flex justify-between items-center text-white">
                   <span className="text-xs font-black uppercase">{selectedStudent || "--"}</span>
                   <div className="flex gap-4">
@@ -400,7 +451,7 @@ export function MainApp({ currentGrade, currentLetter, appData, globalSkills, on
                     contentEditable={!!selectedStudent} 
                     onInput={handleManualEdit}
                     onBlur={handleManualEdit}
-                    className="font-['Plus_Jakarta_Sans'] leading-[1.8] text-[14px] outline-none p-[30px] rounded-xl uppercase text-justify bg-white border-4 border-escola-azul/20 focus:border-escola-azul text-black min-h-[350px] transition-colors"
+                    className="font-['Plus_Jakarta_Sans'] leading-[1.8] text-[14px] outline-none p-[30px] rounded-2xl uppercase text-justify bg-white border border-slate-200 focus:ring-2 focus:ring-slate-100 focus:border-slate-300 text-black min-h-[350px] transition-all shadow-sm"
                   />
                 </div>
               </div>

@@ -26,7 +26,7 @@ export function PinModal({ isOpen, targetGrade, targetLetter, currentPin, isErro
 
   return (
     <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-[10000]">
-      <div className={`bg-white rounded-3xl p-8 shadow-2xl w-full max-w-[340px] border-4 transition-all ${isError ? 'animate-shake border-red-500' : 'border-escola-azul'}`}>
+      <div className={`bg-white rounded-3xl p-8 shadow-2xl w-full max-w-[340px] border border-slate-100 transition-all ${isError ? 'animate-shake ring-2 ring-red-500' : ''}`}>
         <div className="text-center mb-6">
           <h3 className="text-sm font-black text-slate-900 uppercase tracking-widest">Acesso do Professor</h3>
           <p className="text-[10px] text-slate-400 font-bold mt-1 uppercase">
@@ -35,7 +35,7 @@ export function PinModal({ isOpen, targetGrade, targetLetter, currentPin, isErro
         </div>
         <div className="flex justify-center gap-4 mb-8">
           {[0, 1, 2, 3, 4].map((i) => (
-            <div key={i} className={`w-3 h-3 rounded-full border-2 transition-all ${i < currentPin.length ? (isError ? 'bg-red-500 border-red-500 scale-125' : 'bg-escola-azul border-escola-azul scale-125') : 'border-escola-azul/20'}`} />
+            <div key={i} className={`w-3 h-3 rounded-full border transition-all ${i < currentPin.length ? (isError ? 'bg-red-500 border-red-500 scale-125' : 'bg-escola-azul border-escola-azul scale-125') : 'border-slate-300'}`} />
           ))}
         </div>
         <div className="grid grid-cols-3 gap-3">
