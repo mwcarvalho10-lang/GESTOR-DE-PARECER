@@ -14,15 +14,21 @@ export function Dashboard({ appData, onSelectClass }: DashboardProps) {
   const [pinModalOpen, setPinModalOpen] = useState(false);
   const [pendingSelection, setPendingSelection] = useState<{ g: number | null; l: string | null }>({ g: null, l: null });
   const [currentPin, setCurrentPin] = useState("");
+  const [isError, setIsError] = useState(false);
 
   const handlePinChange = (pin: string) => {
+    if (isError) return;
     setCurrentPin(pin);
     if (pin.length === 5) {
       if (pendingSelection.g && pin === PIN_CONFIG[pendingSelection.g.toString()]) {
         onSelectClass(pendingSelection.g.toString(), pendingSelection.l!);
         setPinModalOpen(false);
       } else {
-        setCurrentPin(""); // reset on fail
+        setIsError(true);
+        setTimeout(() => {
+          setCurrentPin("");
+          setIsError(false);
+        }, 500);
       }
     }
   };
@@ -108,6 +114,7 @@ export function Dashboard({ appData, onSelectClass }: DashboardProps) {
         targetGrade={pendingSelection.g}
         targetLetter={pendingSelection.l}
         currentPin={currentPin}
+        isError={isError}
         onPinChange={handlePinChange}
         onCancel={() => setPinModalOpen(false)}
       />

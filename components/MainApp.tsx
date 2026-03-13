@@ -109,6 +109,7 @@ export function MainApp({ currentGrade, currentLetter, appData, globalSkills, on
     if (!selectedStudent) return;
     const studentUnitData = classData[selectedStudent][selectedUnit];
     let newSkills = [...studentUnitData.skills];
+    
     if (newSkills.includes(skillId)) {
       newSkills = newSkills.filter(id => id !== skillId);
     } else {
@@ -370,10 +371,11 @@ export function MainApp({ currentGrade, currentLetter, appData, globalSkills, on
                       <span className={`text-[11px] font-black uppercase ${isSet ? 'text-escola-verde' : 'text-slate-500'}`}>{s.id}</span>
                       {isSet && <CheckCircle2 className="ml-2 w-3.5 h-3.5 text-escola-verde" />}
                       
-                      {/* Tooltip */}
-                      <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 p-3 bg-slate-800 text-white text-[10px] font-bold leading-relaxed rounded-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 pointer-events-none shadow-xl">
+                      {/* Minimalist Flashcard Tooltip */}
+                      <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 w-64 p-5 bg-white border border-slate-200 text-slate-700 text-xs font-bold leading-relaxed rounded-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50 pointer-events-none shadow-2xl origin-bottom scale-95 group-hover:scale-100">
+                        <div className="text-[10px] font-black text-escola-azul uppercase tracking-widest mb-2">{s.id}</div>
                         {s.report}
-                        <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-slate-800"></div>
+                        <div className="absolute top-full left-1/2 -translate-x-1/2 border-8 border-transparent border-t-white"></div>
                       </div>
                     </div>
                   );
@@ -382,7 +384,7 @@ export function MainApp({ currentGrade, currentLetter, appData, globalSkills, on
             </section>
 
             <section className="max-w-5xl mx-auto w-full pb-20">
-              <div className="bg-white rounded-3xl shadow-xl border overflow-hidden">
+              <div className="bg-white rounded-3xl shadow-xl border-t-4 border-escola-azul overflow-hidden">
                 <div className="bg-slate-900 p-6 flex justify-between items-center text-white">
                   <span className="text-xs font-black uppercase">{selectedStudent || "--"}</span>
                   <div className="flex gap-4">

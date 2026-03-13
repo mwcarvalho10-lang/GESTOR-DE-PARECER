@@ -21,7 +21,7 @@ export function StudentModal({ isOpen, initialName, onClose, onConfirm }: Studen
 
   return (
     <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-[10000]">
-      <div className="bg-white rounded-3xl w-full max-w-[340px] p-8 shadow-2xl">
+      <div className="bg-white rounded-3xl w-full max-w-[340px] p-8 shadow-2xl border-t-4 border-escola-azul">
         <h3 className="font-black uppercase text-center text-escola-azul mb-6 tracking-widest">
           {initialName ? "Editar Estudante" : "Novo Estudante"}
         </h3>

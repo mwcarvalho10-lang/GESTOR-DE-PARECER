@@ -21,10 +21,15 @@ export function SkillsModal({ isOpen, onClose, globalSkills, onSaveSkill, onDele
   const [filterGrade, setFilterGrade] = useState("all");
   const [filterSubject, setFilterSubject] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
+  const [activeSkillId, setActiveSkillId] = useState<string | null>(null);
 
   useEffect(() => {
     setSelectedColor(subjectPalettes[newSkillSubject][0]);
   }, [newSkillSubject]);
+
+  useEffect(() => {
+    setActiveSkillId(null);
+  }, [filterGrade, filterSubject, searchQuery]);
 
   if (!isOpen) return null;
 
@@ -67,7 +72,7 @@ export function SkillsModal({ isOpen, onClose, globalSkills, onSaveSkill, onDele
 
   return (
     <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-[10000]">
-      <div className="bg-white rounded-3xl w-[95vw] h-[90vh] max-w-6xl shadow-2xl flex flex-col overflow-hidden">
+      <div className="bg-white rounded-3xl w-[95vw] h-[90vh] max-w-6xl shadow-2xl flex flex-col overflow-hidden border-t-4 border-escola-azul">
         <header className="p-6 border-b flex justify-between items-center bg-white shadow-sm z-10">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-escola-azul/10 rounded-xl flex items-center justify-center text-escola-azul">
@@ -167,20 +172,38 @@ export function SkillsModal({ isOpen, onClose, globalSkills, onSaveSkill, onDele
               </div>
             </div>
             
-            <div className="flex-1 p-6 overflow-y-auto grid grid-cols-1 lg:grid-cols-2 gap-4 content-start">
+            <div className="flex-1 p-6 overflow-y-auto grid grid-cols-1 lg:grid-cols-3 gap-3 content-start">
               {filteredSkills.map((s, idx) => (
-                <div key={idx} className="p-5 bg-white rounded-2xl border-l-8 shadow-sm border border-slate-100 relative group transition-all hover:shadow-md" style={{ borderLeftColor: s.color || '#cbd5e1' }}>
-                  <button onClick={() => { if(confirm("EXCLUIR HABILIDADE?")) onDeleteSkill(globalSkills.indexOf(s)); }} className="absolute top-4 right-4 text-slate-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all">
+                <div 
+                  key={idx} 
+                  onClick={() => setActiveSkillId(s.id)}
+                  className={`p-4 bg-white rounded-xl border-l-4 shadow-sm border cursor-pointer relative group transition-all hover:shadow-md ${activeSkillId === s.id ? 'border-escola-azul ring-2 ring-escola-azul/20' : 'border-slate-100'}`} 
+                  style={{ borderLeftColor: s.color || '#cbd5e1' }}
+                >
+                  <button onClick={(e) => { e.stopPropagation(); if(confirm("EXCLUIR HABILIDADE?")) { onDeleteSkill(globalSkills.indexOf(s)); if (activeSkillId === s.id) setActiveSkillId(null); } }} className="absolute top-1/2 -translate-y-1/2 right-3 text-slate-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all">
                     <Trash2 className="w-4 h-4" />
                   </button>
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="text-[10px] font-black text-slate-800 uppercase">{s.id}</span>
-                    <span className="text-[8px] font-bold text-slate-400 uppercase tracking-tighter">{s.grade}º ANO • {s.subject}</span>
+                  <div className="flex flex-col gap-1 pr-6">
+                    <span className="text-[11px] font-black text-slate-800 uppercase">{s.id}</span>
+                    <span className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter">{s.grade}º ANO • {s.subject}</span>
                   </div>
-                  <p className="text-[11px] font-bold text-slate-600 uppercase leading-relaxed">{s.report}</p>
                 </div>
               ))}
             </div>
+
+            {activeSkillId && (
+              <div className="p-6 bg-white border-t-4 border-escola-azul shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.1)] shrink-0 z-10 animate-in slide-in-from-bottom-4">
+                <div className="flex justify-between items-start mb-2">
+                  <h4 className="text-[10px] font-black text-escola-azul uppercase tracking-widest">Descrição da Habilidade: {activeSkillId}</h4>
+                  <button onClick={() => setActiveSkillId(null)} className="text-slate-400 hover:text-slate-600">
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+                <p className="text-xs font-bold text-slate-700 uppercase leading-relaxed">
+                  {globalSkills.find(s => s.id === activeSkillId)?.report}
+                </p>
+              </div>
+            )}
             
             <footer className="p-4 border-t bg-slate-50 flex justify-between items-center shrink-0">
               <span className="text-[10px] font-black text-slate-400 uppercase">{filteredSkills.length} Habilidades</span>
