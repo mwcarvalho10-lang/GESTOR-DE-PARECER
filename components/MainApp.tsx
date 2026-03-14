@@ -5,6 +5,7 @@ import { units, subjects } from '@/lib/constants';
 import { StudentModal } from './StudentModal';
 import { SkillsModal } from './SkillsModal';
 import { HelpModal } from './HelpModal';
+import { ImportStudentsModal } from './ImportStudentsModal';
 import { Document, Packer, Paragraph, HeadingLevel, AlignmentType, TextRun } from 'docx';
 import { saveAs } from 'file-saver';
 
@@ -30,6 +31,7 @@ export function MainApp({ currentGrade, currentLetter, appData, globalSkills, on
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'inactive'>('active');
 
   const [studentModalOpen, setStudentModalOpen] = useState(false);
+  const [importModalOpen, setImportModalOpen] = useState(false);
   const [studentToEdit, setStudentToEdit] = useState("");
   const [skillsModalOpen, setSkillsModalOpen] = useState(false);
   const [helpModalOpen, setHelpModalOpen] = useState(false);
@@ -73,6 +75,38 @@ export function MainApp({ currentGrade, currentLetter, appData, globalSkills, on
     });
     setStudentModalOpen(false);
     setSelectedStudent(name);
+  };
+
+  const handleImportStudents = (names: string[]) => {
+    const currentStudents = new Set(classData.students);
+    const newNames = names.filter(name => !currentStudents.has(name));
+    
+    if (newNames.length === 0) {
+      alert("Todos os alunos desta lista já estão cadastrados.");
+      return;
+    }
+
+    const newStudents = [...classData.students, ...newNames].sort();
+    
+    const newStudentDataObj: Record<string, any> = {};
+    newNames.forEach(name => {
+      const data: any = { active: true };
+      units.forEach(u => data[u] = { skills: [], observation: "" });
+      newStudentDataObj[name] = data;
+    });
+
+    onUpdateAppData({
+      ...appData,
+      [classKey]: {
+        ...classData,
+        students: newStudents,
+        ...newStudentDataObj
+      }
+    });
+    
+    if (!selectedStudent && newStudents.length > 0) {
+      setSelectedStudent(newStudents[0]);
+    }
   };
 
   const handleEditStudent = (newName: string, active: boolean) => {
@@ -469,9 +503,12 @@ export function MainApp({ currentGrade, currentLetter, appData, globalSkills, on
                 </div>
               )})}
             </div>
-            <div className="p-4 border-t border-slate-100">
-              <button onClick={() => { setStudentToEdit(""); setStudentModalOpen(true); }} className="w-full py-3 rounded-xl border border-dashed border-slate-300 text-slate-500 text-[10px] font-black uppercase hover:text-escola-azul hover:border-escola-azul/40 hover:bg-slate-50 transition-colors">
+            <div className="p-4 border-t border-slate-100 flex gap-2">
+              <button onClick={() => { setStudentToEdit(""); setStudentModalOpen(true); }} className="flex-1 py-3 rounded-xl border border-dashed border-slate-300 text-slate-500 text-[10px] font-black uppercase hover:text-escola-azul hover:border-escola-azul/40 hover:bg-slate-50 transition-colors">
                 + Estudante
+              </button>
+              <button onClick={() => setImportModalOpen(true)} className="flex-1 py-3 rounded-xl border border-dashed border-slate-300 text-slate-500 text-[10px] font-black uppercase hover:text-escola-verde hover:border-escola-verde/40 hover:bg-green-50 transition-colors" title="Importar Lista">
+                Importar
               </button>
             </div>
           </div>
@@ -569,6 +606,12 @@ export function MainApp({ currentGrade, currentLetter, appData, globalSkills, on
         initialActive={studentToEdit ? classData[studentToEdit]?.active !== false : true}
         onClose={() => setStudentModalOpen(false)} 
         onConfirm={studentToEdit ? handleEditStudent : handleAddStudent} 
+      />
+
+      <ImportStudentsModal
+        isOpen={importModalOpen}
+        onClose={() => setImportModalOpen(false)}
+        onImport={handleImportStudents}
       />
       
       <SkillsModal 
